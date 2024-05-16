@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Add Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-500 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <span class="text-white font-bold text-lg">Smart Contact Manager</span>
+            <!-- Add Logout Button -->
+            <a th:href="@{/logout}" class="text-white">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-8">
+        <!-- User Profile Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">User Profile</h2>
+            <!-- Display User's Name, Email, and Profile Pic -->
+            <p th:text="${user.name}"></p>
+            <p th:text="${user.email}"></p>
+            <img th:src="${user.profilePic}" alt="Profile Picture" class="w-24 h-24 rounded-full">
+        </div>
+
+        <!-- Add Contact Form -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4">Add Contact</h2>
+            <form th:action="@{/user/contacts/add}" method="post">
+                <!-- Input fields for Contact Details -->
+                <input type="text" name="name" placeholder="Name" class="w-full mb-4 p-2 border rounded-lg">
+                <input type="text" name="phoneNumber" placeholder="Phone Number" class="w-full mb-4 p-2 border rounded-lg">
+                <!-- Add more fields as needed -->
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Add Contact</button>
+            </form>
+        </div>
+
+        <!-- Contact List -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Contacts</h2>
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <!-- Add more headers as needed -->
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Use Thymeleaf to iterate over contacts and display them -->
+                    <tr th:each="contact : ${contacts}">
+                        <td th:text="${contact.name}"></td>
+                        <td th:text="${contact.phoneNumber}"></td>
+                        <!-- Add more columns as needed -->
+                        <td>
+                            <form th:action="@{/user/contacts/delete/{id}(id=${contact.id})}" method="post">
+                                <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded-lg">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
