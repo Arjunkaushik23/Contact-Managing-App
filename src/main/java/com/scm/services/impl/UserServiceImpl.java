@@ -102,4 +102,10 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public User findByEmail(String email) {
+        Optional<User> optionalUser = userRepo.findByEmail(email);
+        return optionalUser.orElse(null);
+    }
+
 }

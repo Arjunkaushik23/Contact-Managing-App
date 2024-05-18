@@ -4,8 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.scm.entities.User;
 import com.scm.forms.UserForm;
@@ -70,32 +70,13 @@ public class PageController {
         return "signup";
     }
 
-    @RequestMapping(value = "/do-register", method = RequestMethod.POST)
+    @PostMapping(value = "/do-register")
     public String requestMethodName(@Valid @ModelAttribute UserForm userForm, BindingResult bindingResult,
             HttpSession session) {
 
-        // fetch form data
-
-        // UserForm
-
-        // System.out.println(userForm);
-        // validate form data
         if (bindingResult.hasErrors()) {
             return "signup";
         }
-
-        // save to database
-
-        // UserForm ----> user
-
-        // User user = User.builder()
-        // .name(userForm.getName())
-        // .email(userForm.getEmail())
-        // .password(userForm.getPassword())
-        // .about(userForm.getAbout())
-        // .phoneNumber(userForm.getPhoneNumber())
-        // .profilePic("https://www.pngall.com/wp-content/uploads/5/Profile-Avatar-PNG.png")
-        // .build();
 
         User user = new User();
         user.setName(userForm.getName());

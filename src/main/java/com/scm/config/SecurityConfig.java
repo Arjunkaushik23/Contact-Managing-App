@@ -1,25 +1,21 @@
-package com.scm.confrig;
-
-import java.io.IOException;
+package com.scm.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import com.scm.services.impl.SecurityCustomUserDetailService;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -30,12 +26,15 @@ public class SecurityConfig {
     // DAO authentication provider
 
     private final SecurityCustomUserDetailService service;
-
-    public SecurityConfig(SecurityCustomUserDetailService service) {
-        this.service = service;
-    }
+    private final OAuthAuthenticationSuccessfullHandler oAuthAuthenticationSuccessfullHandler;
 
     // configuration of authentication provider :
+
+    public SecurityConfig(SecurityCustomUserDetailService service,
+            OAuthAuthenticationSuccessfullHandler oAuthAuthenticationSuccessfullHandler) {
+        this.service = service;
+        this.oAuthAuthenticationSuccessfullHandler = oAuthAuthenticationSuccessfullHandler;
+    }
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
@@ -66,32 +65,6 @@ public class SecurityConfig {
             form.usernameParameter("email");
             form.passwordParameter("password");
 
-            // form.failureHandler(new AuthenticationFailureHandler() {
-
-            // @Override
-            // public void onAuthenticationFailure(HttpServletRequest request,
-            // HttpServletResponse response,
-            // AuthenticationException exception) throws IOException, ServletException {
-
-            // throw new UnsupportedOperationException("Unimplemented method
-            // 'onAuthenticationFailure'");
-            // }
-
-            // });
-
-            // form.successHandler(new AuthenticationSuccessHandler() {
-
-            // @Override
-            // public void onAuthenticationSuccess(HttpServletRequest request,
-            // HttpServletResponse response,
-            // Authentication authentication) throws IOException, ServletException {
-
-            // throw new UnsupportedOperationException("Unimplemented method
-            // 'onAuthenticationSuccess'");
-            // }
-
-            // });
-
         });
 
         http.csrf(AbstractHttpConfigurer::disable);
@@ -100,12 +73,36 @@ public class SecurityConfig {
             logout.logoutSuccessUrl("/login?logout=true");
         });
 
+        // oauth configuration
+        http.oauth2Login(oauth -> {
+            oauth.loginPage("/login");
+            oauth.successHandler(myAuthenticationSuccessHandler());
+        });
+
         return http.build();
 
     }
 
     @Bean
+    public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response,
+                    Authentication authentication) {
+                // You can include logic here to determine the target URL based on the role or
+                // other factors
+                return "/user/dashboard";
+            }
+        };
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+        return new HiddenHttpMethodFilter();
     }
 }

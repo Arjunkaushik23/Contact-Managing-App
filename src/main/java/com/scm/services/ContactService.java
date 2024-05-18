@@ -9,7 +9,7 @@ public interface ContactService {
 
     List<Contact> getAllContactsForUser(User user);
 
-    void saveContact(Contact contact);
+    void saveContact(Contact contact, User user);
 
     void deleteContactById(Long contactId);
 
