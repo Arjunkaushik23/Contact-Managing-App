@@ -1,24 +1,36 @@
 package com.scm.controller;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.scm.entities.Contact;
 import com.scm.entities.User;
+import com.scm.forms.ContactForm;
+import com.scm.helpers.Message;
+import com.scm.helpers.MessageType;
 import com.scm.services.ContactService;
+import com.scm.services.ImageService;
 import com.scm.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @Controller
+@RequestMapping("/user/contacts")
 public class ContactController {
 
     public static final String DASHBOAR_REDIRECT_URL = "redirect:/user/dashboard";
@@ -27,46 +39,121 @@ public class ContactController {
 
     private final ContactService contactService;
     private final UserService userService;
+    private final ImageService imageService;
 
-    public ContactController(ContactService contactService, UserService userService) {
+    public ContactController(ContactService contactService, UserService userService, ImageService imageService) {
         this.contactService = contactService;
         this.userService = userService;
+        this.imageService = imageService;
     }
 
-    @PostMapping("/contacts/add")
-    public String addContact(@ModelAttribute("contact") Contact contact, Model model, Authentication authentication) {
-        // Get the authenticated user from Authentication
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = userService.findByEmail(userDetails.getUsername());
+    @RequestMapping("/add")
+    public String addContact(
+            Model model
+    // @ModelAttribute("contact") Contact contact, Model model, Authentication
+    // authentication
+    ) {
+        // String username = getUsernameFromAuthentication(authentication);
 
-        LOGGER.info("This is the user which we are trying to get : " + userDetails.getUsername());
+        // if (username != null) {
+        // User user = userService.findByEmail(username);
 
-        if (user != null) {
-            // Set the user for the contact and save
-            contact.setUser(user);
-            contactService.saveContact(contact, user);
-        } else {
-            // Handle case where user is not found
-            LOGGER.error("User not found for username: " + userDetails.getUsername());
-            // You can redirect to an error page or handle it as per your application's
-            // logic
-            return "redirect:/error";
+        // if (user != null) {
+        // Set the user for the contact and save
+        // contact.setUser(user);
+        // contactService.saveContact(contact, user);
+        // Redirect to the dashboard page after adding the contact
+        // return "user/add_contact";
+        // return DASHBOAR_REDIRECT_URL;
+        // } else {
+        // Handle case where user is not found
+        // LOGGER.error("User not found for username: " + username);
+        // }
+        // }
+
+        // Redirect to an error page if user is not found or username is null
+
+        ContactForm contactForm = new ContactForm();
+        // contactForm.setName("Arjun Kaushik");
+        // contactForm.setEmail("arjun9717@gmail.com");
+        // contactForm.setFavorite(true);
+        model.addAttribute("contactForm", contactForm);
+
+        return "user/add_contact";
+    }
+
+    @RequestMapping(value = "/do-add", method = RequestMethod.POST)
+    public String saveContact(@ModelAttribute("contactForm") @Valid ContactForm contactForm,
+            BindingResult result,
+            Authentication authentication,
+            // Model model,
+            HttpSession session) {
+
+        // validate the form
+        if (result.hasErrors()) {
+            session.setAttribute("message", Message.builder()
+            .content("Please correct the following errors")
+            .type(MessageType.red)
+            .build());
+            return "user/add_contact";
         }
 
-        // Redirect to the dashboard page after adding the contact
-        return DASHBOAR_REDIRECT_URL;
+        String username = getUsernameFromAuthentication(authentication);
+
+
+        //image process
+        LOGGER.info("file information : {}", contactForm.getContactImage().getOriginalFilename());
+
+        String filename = UUID.randomUUID().toString();
+
+        // upload file
+        String fileURL = imageService.uploadImage(contactForm.getContactImage(), filename);
+
+        // change form to contact
+        User user = userService.findByEmail(username);
+
+        // process the contact picture
+        Contact contact = new Contact();
+        contact.setName(contactForm.getName());
+        contact.setEmail(contactForm.getEmail());
+        contact.setAddress(contactForm.getAddress());
+        contact.setDescription(contactForm.getDescription());
+        contact.setFavorite(contactForm.isFavorite());
+        contact.setPhoneNumber(contactForm.getPhoneNumber());
+        contact.setLinkedInLink(contactForm.getLinkedInLink());
+        contact.setWebsiteLink(contactForm.getWebsiteLink());
+        contact.setPicture(fileURL);
+        contact.setCloudinaryImagePublicId(filename);
+        // contact.setPicture(null);
+        contact.setUser(user);
+
+        // process the data
+        contactService.saveContact(contact);
+
+        Message message = Message.builder().content("Contact Added Successfully").type(MessageType.blue).build();
+
+        session.setAttribute("message", message);
+
+        // print that thing
+        System.out.println(contactForm);
+
+        return "redirect:/user/contacts/add";
     }
 
     @DeleteMapping("/contacts/delete/{id}")
     public String deleteContact(@PathVariable Long id, HttpSession session, Authentication authentication) {
-        // Get the logged-in user from the session
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = userService.findByEmail(userDetails.getUsername());
+        String username = getUsernameFromAuthentication(authentication);
+
+        if (username == null) {
+            // Handle case where the user is not logged in
+            return "redirect:/login"; // Redirect to login page
+        }
+
+        User user = userService.findByEmail(username);
 
         if (user == null) {
-            // Handle case where user is not logged in
-            return "redirect:/login"; // Redirect to login page is here
-
+            // Handle case where user is not found
+            return "redirect:/login"; // Redirect to login page
         }
 
         // Check if the contact belongs to the logged-in user
@@ -83,4 +170,50 @@ public class ContactController {
         return DASHBOAR_REDIRECT_URL;
     }
 
+    /**
+     * Retrieves the username from the Authentication object.
+     *
+     * @param authentication the Authentication object
+     * @return the username or null if not found
+     */
+    private String getUsernameFromAuthentication(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        String username = null;
+
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            username = userDetails.getUsername();
+        } else if (principal instanceof DefaultOAuth2User) {
+            DefaultOAuth2User oauthUser = (DefaultOAuth2User) principal;
+            username = oauthUser.getAttribute("email");
+
+            if (username == null) {
+                username = oauthUser.getAttribute("login") + "@gmail.com"; // Use login attribute as fallback
+                LOGGER.info("User attribute for login is: " + username);
+            }
+        }
+
+        return username;
+    }
+
+
+    @RequestMapping()
+    public String viewContacts(Authentication authentication){
+
+        String username = getUsernameFromAuthentication(authentication);
+
+        User byUsername = userService.findByUsername(username);
+        
+        // String userId = byUsername.getUserId();
+        //load all users
+        List<Contact> allContactsForUser = contactService.getAllContactsForUser(byUsername);
+        // LOGGER.info("Retrieved contacts for user {}: {}`", username, allContactsForUser);
+
+        LOGGER.info("Retrieved contacts for user {}:", username);
+        for (Contact contact : allContactsForUser) {
+            LOGGER.info("Here are the information {}:",contact.toString());
+        }
+
+        return "user/contacts";
+    }
 }

@@ -86,7 +86,7 @@ public class PageController {
         user.setPhoneNumber(userForm.getPhoneNumber());
         user.setProfilePic("https://www.pngall.com/wp-content/uploads/5/Profile-Avatar-PNG.png");
 
-        User savedUser = userService.saveUser(user);
+        userService.saveUser(user);
 
         System.out.println("User saved successfully");
         // message= "Registeration successful"

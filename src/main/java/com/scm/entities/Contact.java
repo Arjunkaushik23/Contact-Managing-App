@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -23,11 +24,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Builder
+@ToString
 public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String email;
     private String name;
     private String phoneNumber;
     private String address;
@@ -37,6 +40,8 @@ public class Contact {
 
     private String websiteLink;
     private String linkedInLink;
+
+    private String cloudinaryImagePublicId;
 
     @ManyToOne
     private User user;

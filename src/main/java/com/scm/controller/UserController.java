@@ -2,6 +2,8 @@ package com.scm.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -19,48 +21,82 @@ import com.scm.services.UserService;
 public class UserController {
 
     private final ContactService contactService;
-
     private final UserService userService;
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    // User dashboard
+    // Constructor
     public UserController(ContactService contactService, UserService userService) {
         this.contactService = contactService;
         this.userService = userService;
     }
 
+    /**
+     * Retrieves the username from the Authentication object.
+     *
+     * @param authentication the Authentication object
+     * @return the username or null if not found
+     */
+    private String getUsernameFromAuthentication(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        String username = null;
+
+        if (principal instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) principal;
+            username = userDetails.getUsername();
+        } else if (principal instanceof DefaultOAuth2User) {
+            DefaultOAuth2User oauthUser = (DefaultOAuth2User) principal;
+            username = oauthUser.getAttribute("email");
+
+            if (username == null) {
+                username = oauthUser.getAttribute("login") + "@gmail.com"; // Use login attribute as fallback
+                logger.info("User attribute for login is: " + username);
+            }
+        }
+
+        return username;
+    }
+
+    // User dashboard
     @RequestMapping(value = "/dashboard")
     public String userDashboard(Model model, Authentication authentication) {
-        User user = null;
-        if (authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            user = userService.findByEmail(userDetails.getUsername());
-        } else if (authentication.getPrincipal() instanceof DefaultOAuth2User) {
-            DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
-            String username = oauthUser.getAttribute("email"); // Make sure to use the correct attribute key
-            user = userService.findByEmail(username);
+        String username = getUsernameFromAuthentication(authentication);
+
+        if (username == null) {
+            return "redirect:/login"; // Handle case where the user is not authenticated
         }
+
+        User user = userService.findByEmail(username);
 
         if (user != null) {
             model.addAttribute("user", user);
             List<Contact> contacts = contactService.getAllContactsForUser(user);
             model.addAttribute("contacts", contacts);
         } else {
-            // Handle the case where the user is null
-            // Redirect to a default page or show an error message
-            return "redirect:/some-default-page";
+            return "redirect:/login"; // Handle the case where the user is null
         }
+
         return "user/dashboard";
     }
 
+    // User profile
     @RequestMapping(value = "/profile")
     public String userProfile(Model model, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        model.addAttribute("user", userDetails);
-        User user = userService.findByEmail(userDetails.getUsername());
-        List<Contact> contacts = contactService.getAllContactsForUser(user);
-        model.addAttribute("contacts", contacts);
+        String username = getUsernameFromAuthentication(authentication);
+
+        if (username == null) {
+            return "redirect:/login"; // Handle case where the user is not authenticated
+        }
+
+        User user = userService.findByEmail(username);
+
+        if (user != null) {
+            model.addAttribute("user", user);
+            List<Contact> contacts = contactService.getAllContactsForUser(user);
+            model.addAttribute("contacts", contacts);
+        } else {
+            return "redirect:/login"; // Handle the case where the user is null
+        }
 
         return "user/profile";
     }
-
 }

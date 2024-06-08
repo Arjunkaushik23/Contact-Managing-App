@@ -1,7 +1,10 @@
 package com.scm.forms;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,11 +17,11 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @ToString
-public class UserForm {
+@Builder
+public class ContactForm {
 
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "Name is required")
     @Size(min = 3, message = "Min 3 Characters is required")
     private String name;
 
@@ -26,14 +29,29 @@ public class UserForm {
     @NotBlank(message = "Email Address Required")
     private String email;
 
-    @NotBlank(message = "Invalid Password")
-    @Size(min = 6, message = "Min 6 Characters required")
-    private String password;
-
-    @Size(min = 10, max = 10, message = "Invalid Phone Number")
+    @NotBlank(message = "Invalid Phone Number")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Invalid Phone Number")
     private String phoneNumber;
 
-    @NotBlank(message = "About is required")
-    private String about;
+    @NotBlank(message = "Address is required")
+    private String address;
+
+    // create annotation
+    // size
+    // Resolution
+    
+    private MultipartFile contactImage;
+
+   
+    private String description;
+
+    private boolean favorite;
+
+    
+    private String websiteLink;
+
+    
+    private String linkedInLink;
+
 
 }

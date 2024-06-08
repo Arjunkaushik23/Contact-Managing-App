@@ -14,7 +14,25 @@
 <body class="h-screen w-full bg-gray-200 dark:bg-gray-900 dark:text-white">
 
     <!-- COMMON HEADER -->
-    <div data-th-replace="navbar::navbar"></div>
+
+    <!-- if user is logged in then we have to show this thing -->
+    <div th:if="${user}">
+        <div data-th-replace="~{user/user_navbar::user-navbar}"></div>
+    </div>
+    <!-- when user is not logged in then we have to show this one -->
+    <div data-th-unless="${user}">
+        <div data-th-replace="~{navbar::navbar}"></div>
+    </div>
+
+
+    <!-- SIDE-BAR -->
+
+    <!-- if user is not logged in then show this one  -->
+
+    <div data-th-unless="${user}">
+
+    </div>
+
 
     <!-- main content -->
     <div class="p-4">

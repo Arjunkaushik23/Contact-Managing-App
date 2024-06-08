@@ -23,9 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-
-public class OAuthAuthenticationSuccessfullHandler implements
-        AuthenticationSuccessHandler {
+public class OAuthAuthenticationSuccessfullHandler implements AuthenticationSuccessHandler {
 
     Logger logger = LoggerFactory.getLogger(OAuthAuthenticationSuccessfullHandler.class);
 
@@ -41,19 +39,36 @@ public class OAuthAuthenticationSuccessfullHandler implements
             Authentication authentication) throws IOException, ServletException {
 
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        DefaultOAuth2User oauthUser = (DefaultOAuth2User) oauthToken.getPrincipal();
+        DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
 
         String email = oauthUser.getAttribute("email");
+        // logger.info("This is user email : " + email);
         String name = oauthUser.getAttribute("name");
-        String picture = oauthUser.getAttribute("picture");
+        // logger.info("This is user name : " + name);
+        String picture = oauthUser.getAttribute("avatar_url");
+        // logger.info("This is user picture : " + picture);
+        String about = oauthUser.getAttribute("bio");
 
-        User user = userRepository.findByEmail(email)
+        // Handle null email case
+        if (email == null || email.isEmpty()) {
+            // You can either prompt the user to enter their email or generate a placeholder
+            // email
+            // For simplicity, we will generate a placeholder email
+            email = oauthUser.getAttribute("login") + "@gmail.com";
+            logger.info("This is the user updated username now", email);
+
+        }
+
+        final String emailFinal = email;
+
+        User user = userRepository.findByEmail(emailFinal)
                 .orElseGet(() -> {
                     User newUser = new User();
                     newUser.setUserId(UUID.randomUUID().toString()); // Manually setting the userId
-                    newUser.setEmail(email);
+                    newUser.setEmail(emailFinal);
                     newUser.setName(name);
                     newUser.setProfilePic(picture);
+                    newUser.setAbout(about);
                     newUser.setProvider(
                             Providers.valueOf(oauthToken.getAuthorizedClientRegistrationId().toUpperCase()));
                     newUser.setRoleList(List.of(AppConstants.ROLE_USER));
@@ -62,7 +77,6 @@ public class OAuthAuthenticationSuccessfullHandler implements
 
         userRepository.save(user);
 
-        new DefaultRedirectStrategy().sendRedirect(request, response, "/user/dashboard");
+        new DefaultRedirectStrategy().sendRedirect(request, response, "/user/profile");
     }
-
 }

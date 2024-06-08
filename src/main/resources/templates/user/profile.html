@@ -1,60 +1,83 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="~{base :: parent(~{::#content}, ~{::title})}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
+    <title data-th-text="${user.name}+ ' | SCM'"></title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 dark:bg-gray-900 font-sans">
-    <div class="container mx-auto p-4" id="content">
-        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div class="flex flex-col items-center space-y-4 mb-6">
-                <img class="h-32 w-32 rounded-full object-cover" th:src="${user.profilePic}" alt="Profile Picture">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100" th:text="${user.name}"></h1>
-                <p class="text-gray-600 dark:text-gray-400" th:text="${user.username}"></p>
-                <div class="flex space-x-3">
-                    <!-- Social media icons -->
-                </div>
-            </div>
-            <div class="border-t pt-4 border-gray-300 dark:border-gray-600">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">About</h2>
-                <p class="text-gray-600 dark:text-gray-400 mt-2 mb-4" th:text="${user.about}"></p>
-            </div>
-            <div class="border-t pt-4 border-gray-300 dark:border-gray-600">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Contacts</h2>
-                    <div class="flex space-x-2">
-                        <a th:href="@{/user/dashboard}" class="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Dashboard</a>
+
+    <div id="content">
+        <!-- sidebar  -->
+
+    <!-- if user is logged in then show this one -->
+    <div data-th-if="${user}">
+        <div data-th-replace="~{user/sidebar::sidebar}"></div>
+      </div>
+  
+
+
+        <div class="container mx-auto sm:pl-64 pt-20" style="height: 2000px;">
+            <h1 class="items-center text-center text-5xl mb-12">Welcome to Profile Page</h1>
+            <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div class="flex flex-col items-center space-y-4 mb-6">
+                    <img class="h-32 w-32 rounded-full object-cover" th:src="${user.profilePic}" alt="Profile Picture">
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100" th:text="${user.name}"></h1>
+                    <p class="text-gray-600 dark:text-gray-400" th:text="${user.username}"></p>
+                    <div class="flex space-x-3">
+                        <!-- Social media icons -->
                     </div>
                 </div>
-                <!-- Contacts list goes here -->
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-orange-900 dark:text-blue-500 mb-4">
-                            <th>Name</th>
-                            <th>Phone Number</th>
-                            <!-- Add more headers as needed -->
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Use Thymeleaf to iterate over contacts and display them -->
-                        <tr th:each="contact : ${contacts}" class="text-gray-900 dark:text-gray-100 text-center mb-2">
-                            <td th:text="${contact.name}"></td>
-                            <td th:text="${contact.phoneNumber}"></td>
-                            <!-- Add more columns as needed -->
-                            <td>
-                                <form th:action="@{/contacts/delete/{id}(id=${contact.id})}" method="post">
-                                    <input type="hidden" name="_method" value="delete">
-                                    <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded-lg mb-2">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="border-t pt-4 border-gray-300 dark:border-gray-600">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">About</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mt-2 mb-4" th:text="${user.about}"></p>
+                </div>
+                <div class="border-t pt-4 border-gray-300 dark:border-gray-600">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Contacts</h2>
+                        <div class="flex space-x-2">
+                            <a th:href="@{/user/dashboard}"
+                                class="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Dashboard</a>
+                        </div>
+                    </div>
+                    <!-- Contacts list goes here -->
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-orange-900 dark:text-blue-500 mb-4">
+                                <th>Name</th>
+                                <th>Phone Number</th>
+                                <!-- Add more headers as needed -->
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Use Thymeleaf to iterate over contacts and display them -->
+                            <tr th:each="contact : ${contacts}"
+                                class="text-gray-900 dark:text-gray-100 text-center mb-2">
+                                <td th:text="${contact.name}"></td>
+                                <td th:text="${contact.phoneNumber}"></td>
+                                <!-- Add more columns as needed -->
+                                <td>
+                                    <form th:action="@{/contacts/delete/{id}(id=${contact.id})}" method="post">
+                                        <input type="hidden" name="_method" value="delete">
+                                        <button type="submit"
+                                            class="bg-red-500 text-white px-2 py-1 rounded-lg mb-2">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
     </div>
+    <script>
+        console.log("this is profile page")
+    </script>
 </body>
+
 </html>

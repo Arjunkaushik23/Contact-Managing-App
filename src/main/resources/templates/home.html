@@ -1,14 +1,98 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="~{base :: parent(~{::#content}, ~{::title})}">
- <head>
-    <title >Home Page</title>
- </head>
-<body>
-    <div id="content">
-        <h1>Home Page</h1>
-        <p>This is home page</p>
-        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Enim, reprehenderit?
-    </div>
+<html lang="en" th:replace="~{base :: parent(~{::#content}, ~{::title})}"  class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Smart Contact Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Tailwind CSS Dark Mode configuration */
+        .dark-mode {
+            --tw-bg-opacity: 1;
+            background-color: rgba(26, 32, 44, var(--tw-bg-opacity)); /* dark background color */
+            --tw-text-opacity: 1;
+            color: rgba(203, 213, 224, var(--tw-text-opacity)); /* light text color */
+        }
+
+        /* Custom animation classes */
+        .animate-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(203, 213, 224, 0.7);
+            }
+
+            50% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(203, 213, 224, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(203, 213, 224, 0);
+            }
+        }
+    </style>
+</head>
+
+<body id="content" class="bg-gray-100 dark:bg-gray-900 dark:text-gray-300">
+    <!-- <header class="bg-white dark:bg-gray-800 py-6 shadow-md">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Smart Contact Manager</h1>
+            <nav>
+                <a href="#" class="px-3 text-gray-800 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white">Home</a>
+                <a href="#" th:href="@{/login}"
+                    class="px-3 text-gray-800 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white">Login</a>
+                <a href="#" th:href="@{/signup}"
+                    class="px-3 text-gray-800 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white">Sign
+                    Up</a>
+            </nav>
+        </div>
+    </header> -->
+    <main class="container mx-auto px-6 py-12">
+        <section class="text-center mb-12">
+            <h2 class="text-4xl font-semibold mb-4 text-gray-800 dark:text-white">Welcome to Smart Contact Manager</h2>
+            <p class="text-gray-600 dark:text-gray-400">Manage your contacts efficiently and effortlessly with our
+                user-friendly interface.</p>
+        </section>
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                <img th:src="@{/images/image2.png}" alt="Image 1" class="w-full h-auto mb-4 rounded-lg animate-pulse">
+                <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">Effortless Contact Management</h3>
+                <p class="text-gray-600 dark:text-gray-400">Easily add, edit, and delete your contacts with an intuitive
+                    interface.</p>
+            </div>
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                <img th:src="@{/images/image3.png}" alt="Image 2" class="w-full h-auto mb-4 rounded-lg animate-pulse">
+                <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">Secure User Authentication</h3>
+                <p class="text-gray-600 dark:text-gray-400">Keep your contact information safe with secure login and
+                    authentication features.</p>
+            </div>
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg transform transition-transform hover:scale-105">
+                <img th:src="@{/images/image2.png}" alt="Image 3" class="w-full h-auto mb-4 rounded-lg animate-pulse">
+                <h3 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">Responsive Design</h3>
+                <p class="text-gray-600 dark:text-gray-400">Access your contacts on any device with a responsive design
+                    that looks great on mobile and desktop.</p>
+            </div>
+        </section>
+        <section class="text-center mt-12">
+            <a href="/login"
+                class="inline-block bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition-transform hover:scale-110">Get
+                Started</a>
+        </section>
+    </main>
+    <footer class="bg-white dark:bg-gray-800 py-6 mt-12 shadow-md">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-gray-600 dark:text-gray-400">© 2024 Smart Contact Manager. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 
 </html>

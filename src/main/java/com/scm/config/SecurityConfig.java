@@ -6,18 +6,12 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import com.scm.services.impl.SecurityCustomUserDetailService;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -60,7 +54,7 @@ public class SecurityConfig {
         http.formLogin(form -> {
             form.loginPage("/login");
             form.loginProcessingUrl("/authenticate");
-            form.successForwardUrl("/user/dashboard");
+            form.successForwardUrl("/user/profile");
             form.failureForwardUrl("/login?error=true");
             form.usernameParameter("email");
             form.passwordParameter("password");
@@ -76,24 +70,11 @@ public class SecurityConfig {
         // oauth configuration
         http.oauth2Login(oauth -> {
             oauth.loginPage("/login");
-            oauth.successHandler(myAuthenticationSuccessHandler());
+            oauth.successHandler(oAuthAuthenticationSuccessfullHandler);
         });
 
         return http.build();
 
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler myAuthenticationSuccessHandler() {
-        return new SimpleUrlAuthenticationSuccessHandler() {
-            @Override
-            protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response,
-                    Authentication authentication) {
-                // You can include logic here to determine the target URL based on the role or
-                // other factors
-                return "/user/dashboard";
-            }
-        };
     }
 
     @Bean
