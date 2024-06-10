@@ -41,6 +41,8 @@ public class ContactController {
     private final UserService userService;
     private final ImageService imageService;
 
+    private User byEmail;
+
     public ContactController(ContactService contactService, UserService userService, ImageService imageService) {
         this.contactService = contactService;
         this.userService = userService;
@@ -198,21 +200,24 @@ public class ContactController {
 
 
     @RequestMapping()
-    public String viewContacts(Authentication authentication){
+    public String viewContacts(Model model, Authentication authentication){
 
         String username = getUsernameFromAuthentication(authentication);
+        LOGGER.info("The username is : {}", username);
 
-        User byUsername = userService.findByUsername(username);
+        User userByEmail = userService.findByEmail(username);
+        LOGGER.info("The user is following : {}", userByEmail);
         
         // String userId = byUsername.getUserId();
         //load all users
-        List<Contact> allContactsForUser = contactService.getAllContactsForUser(byUsername);
-        // LOGGER.info("Retrieved contacts for user {}: {}`", username, allContactsForUser);
+        List<Contact> allContactsForUser = contactService.getAllContactsForUser(userByEmail);
 
         LOGGER.info("Retrieved contacts for user {}:", username);
         for (Contact contact : allContactsForUser) {
             LOGGER.info("Here are the information {}:",contact.toString());
         }
+
+        model.addAttribute("contacts", allContactsForUser);
 
         return "user/contacts";
     }
