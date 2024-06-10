@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.scm.entities.Contact;
 import com.scm.entities.User;
 import com.scm.forms.ContactForm;
+import com.scm.helpers.AppConstants;
 import com.scm.helpers.Message;
 import com.scm.helpers.MessageType;
 import com.scm.services.ContactService;
@@ -59,7 +62,6 @@ public class ContactController {
 
         // if (username != null) {
         // User user = userService.findByEmail(username);
-
         // if (user != null) {
         // Set the user for the contact and save
         // contact.setUser(user);
@@ -72,9 +74,7 @@ public class ContactController {
         // LOGGER.error("User not found for username: " + username);
         // }
         // }
-
         // Redirect to an error page if user is not found or username is null
-
         ContactForm contactForm = new ContactForm();
         // contactForm.setName("Arjun Kaushik");
         // contactForm.setEmail("arjun9717@gmail.com");
@@ -94,14 +94,13 @@ public class ContactController {
         // validate the form
         if (result.hasErrors()) {
             session.setAttribute("message", Message.builder()
-            .content("Please correct the following errors")
-            .type(MessageType.red)
-            .build());
+                    .content("Please correct the following errors")
+                    .type(MessageType.red)
+                    .build());
             return "user/add_contact";
         }
 
         String username = getUsernameFromAuthentication(authentication);
-
 
         //image process
         LOGGER.info("file information : {}", contactForm.getContactImage().getOriginalFilename());
@@ -198,27 +197,51 @@ public class ContactController {
         return username;
     }
 
-
     @RequestMapping()
-    public String viewContacts(Model model, Authentication authentication){
+    public String viewContacts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            Model model, Authentication authentication) {
+
+        size = Math.max(size, 1); // Ensure size is at least 1
 
         String username = getUsernameFromAuthentication(authentication);
         LOGGER.info("The username is : {}", username);
 
-        User userByEmail = userService.findByEmail(username);
-        LOGGER.info("The user is following : {}", userByEmail);
-        
-        // String userId = byUsername.getUserId();
-        //load all users
-        List<Contact> allContactsForUser = contactService.getAllContactsForUser(userByEmail);
-
-        LOGGER.info("Retrieved contacts for user {}:", username);
-        for (Contact contact : allContactsForUser) {
-            LOGGER.info("Here are the information {}:",contact.toString());
+        if (username == null) {
+            return "redirect:/login"; // Handle case where the user is not authenticated
         }
 
-        model.addAttribute("contacts", allContactsForUser);
+        User userByEmail = userService.findByEmail(username);
+        LOGGER.info("The user is following : {}", userByEmail);
+
+        if (userByEmail != null) {
+            // Load all contacts for the user
+            Page<Contact> pageContact = contactService.getAllContactsForUser(userByEmail, size, page, sortBy, direction);
+
+            // Log the contacts retrieved
+            if (pageContact != null && !pageContact.isEmpty()) {
+                pageContact.forEach(contact -> LOGGER.info("Contact: {}", contact));
+            } else {
+                LOGGER.info("No contacts found for user: {}", username);
+            }
+
+            // LOGGER.info("Retrieved contacts for user {}:", username);
+
+            // for (Contact contact : pageContact) {
+            //     LOGGER.info("Here are the information {}:", contact.toString());
+            // }
+
+            model.addAttribute("pageContact", pageContact);
+            model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
+
+        } else {
+            return "redirect:/login"; // Handle the case where the user is null
+        }
 
         return "user/contacts";
     }
+
 }

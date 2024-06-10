@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.scm.entities.Contact;
 import com.scm.entities.User;
@@ -58,7 +60,15 @@ public class UserController {
 
     // User dashboard
     @RequestMapping(value = "/dashboard")
-    public String userDashboard(Model model, Authentication authentication) {
+    public String userDashboard(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            Model model, Authentication authentication) {
+
+        size = Math.max(size, 1); // Ensure size is at least 1
+
         String username = getUsernameFromAuthentication(authentication);
 
         if (username == null) {
@@ -69,8 +79,8 @@ public class UserController {
 
         if (user != null) {
             model.addAttribute("user", user);
-            List<Contact> contacts = contactService.getAllContactsForUser(user);
-            model.addAttribute("contacts", contacts);
+            Page<Contact> pageContacts = contactService.getAllContactsForUser(user, size, page, sortBy, direction);
+            model.addAttribute("contacts", pageContacts);
         } else {
             return "redirect:/login"; // Handle the case where the user is null
         }
@@ -78,9 +88,17 @@ public class UserController {
         return "user/dashboard";
     }
 
-    // User profile
+// User profile
     @RequestMapping(value = "/profile")
-    public String userProfile(Model model, Authentication authentication) {
+    public String userProfile(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            Model model, Authentication authentication) {
+
+        size = Math.max(size, 1); // Ensure size is at least 1
+
         String username = getUsernameFromAuthentication(authentication);
 
         if (username == null) {
@@ -91,12 +109,13 @@ public class UserController {
 
         if (user != null) {
             model.addAttribute("user", user);
-            List<Contact> contacts = contactService.getAllContactsForUser(user);
-            model.addAttribute("contacts", contacts);
+            Page<Contact> pageContacts = contactService.getAllContactsForUser(user, size, page, sortBy, direction);
+            model.addAttribute("contacts", pageContacts);
         } else {
             return "redirect:/login"; // Handle the case where the user is null
         }
 
         return "user/profile";
     }
+
 }

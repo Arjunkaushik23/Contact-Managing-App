@@ -36,7 +36,7 @@ public class Contact {
     private String address;
     private String picture;
     private String description;
-    private boolean favorite=false;
+    private boolean favorite = false;
 
     private String websiteLink;
     private String linkedInLink;
