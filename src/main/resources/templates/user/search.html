@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{base :: parent(~{::#content}, ~{::title})}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 font-sans">
+
+    <div id="content">
+        <!-- sidebar  -->
+
+        <!-- if user is logged in then show this one -->
+        <div data-th-if="${user}">
+            <div data-th-replace="~{user/sidebar::sidebar}"></div>
+        </div>
+
+        <div class="container mx-auto sm:pl-64 pt-20" style="height: 2000px;">
+            <h1 class="items-center text-center text-5xl mb-12">Welcome to Search Page</h1>
+        </div>
+
+    </div>
+    <script>
+        console.log("this is profile page")
+    </script>
+</body>
+
+</html>

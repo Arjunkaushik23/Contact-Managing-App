@@ -244,4 +244,17 @@ public class ContactController {
         return "user/contacts";
     }
 
+    // search handler
+
+    @RequestMapping("/search")
+    public String searchHandler(
+        @RequestParam("field") String field,
+        @RequestParam("keyword") String keywword
+    ){
+
+        LOGGER.info("feild {} keyword {}", field, keywword);
+        return "user/search";
+    }
+
+
 }
