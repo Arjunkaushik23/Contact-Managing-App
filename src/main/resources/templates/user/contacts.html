@@ -20,15 +20,15 @@
                 <p class="text-center">List of all contacts</p>
                 <div class="contacts_container p-5">
                     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                        <form action="" data-th-action="@{'/user/contacts/search'}">
+                        <form data-th-object="${contactSearchForm}" action="" data-th-action="@{'/user/contacts/search'}">
                             <div
                             class="flex space-x-3 p-5 items-center justify-start flex-column flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900">
 
                             <!-- select box  -->
                             <div>
-                                <select name="field" id="countries_disabled"
+                                <select data-th-field="*{field}" name="field" id="countries_disabled"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option selected>Select Feild</option>
+                                    <option selected value="">Select Feild</option>
                                     <option value="name">Name</option>
                                     <option value="phone">Phone</option>
                                     <option value="email">Email</option>
@@ -46,7 +46,7 @@
                                                 stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                                         </svg>
                                     </div>
-                                    <input name="keyword" type="text" id="table-search-users"
+                                    <input data-th-field="*{keyword}" name="keyword" type="text" id="table-search-users"
                                         class="block w-80 p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                         placeholder="Search for users">
                                 </div>
@@ -54,7 +54,9 @@
                             <button type="submit" class="px-3 py-1.5 bg-gray-800 text-white rounded">Search</button>
                         </div>
                         </form>
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <table 
+                        data-th-if="${pageContact.totalElements > 0}"
+                        class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead
                                 class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
@@ -102,7 +104,7 @@
                             </tbody>
                         </table>
 
-                        <div class="pagination_container p-5 text-center">
+                        <div data-th-if="${pageContact.totalElements > 0}" class="pagination_container p-5 text-center">
                             <nav aria-label="Page navigation example">
                                 <ul class="inline-flex -space-x-px text-base h-10">
                                     <li>
@@ -126,6 +128,8 @@
                                 </ul>
                             </nav>
                         </div>
+
+                        <h1 class="text-5xl text-center bg-white p-4 dark:bg-gray-300 dark:text-gray-700" data-th-if="${pageContact.totalElements<=0}">No Result found</h1>
                     </div>
                 </div>
             </div>

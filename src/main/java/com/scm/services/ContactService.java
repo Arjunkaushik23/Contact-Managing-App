@@ -23,6 +23,8 @@ public interface ContactService {
 
     Contact getContactById(Long contactId);
     
-    List<Contact> search(String name, String email, String phoneNumber);
+    Page<Contact> searchByName(String nameKeyword, int size, int page, String sortBy, String order,User user);
+    Page<Contact> searchByEmail(String emailKeyword, int size, int page, String sortBy, String order,User user);
+    Page<Contact> searchByPhone(String phoneNumberKeyword, int size, int page, String sortBy, String order,User user);
 
 }

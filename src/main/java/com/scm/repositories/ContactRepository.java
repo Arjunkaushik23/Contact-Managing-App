@@ -15,9 +15,16 @@ import com.scm.entities.User;
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
 // custom finder method
+
     Page<Contact> findByUser(User user, Pageable pageable);
 
     // custome query method
     @Query("SELECT c FROM Contact c WHERE c.user.id = :userId")
     List<Contact> findByUserId(@Param("userId") String userId);
+
+    Page<Contact> findByUserAndNameContaining(User user, String nameKeyword, Pageable pageable);
+
+    Page<Contact> findByUserAndEmailContaining(User user, String emailKeyword, Pageable pageable);
+
+    Page<Contact> findByUserAndPhoneNumberContaining(User user, String phoneKeyword, Pageable pageable);
 }

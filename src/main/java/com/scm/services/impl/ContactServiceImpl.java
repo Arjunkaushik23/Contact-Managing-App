@@ -1,21 +1,19 @@
 package com.scm.services.impl;
 
-import com.scm.entities.Contact;
-import com.scm.entities.User;
-import com.scm.repositories.ContactRepository;
-import com.scm.services.ContactService;
-
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import com.scm.entities.Contact;
+import com.scm.entities.User;
+import com.scm.repositories.ContactRepository;
+import com.scm.services.ContactService;
 
 @Service
 public class ContactServiceImpl implements ContactService {
@@ -27,11 +25,6 @@ public class ContactServiceImpl implements ContactService {
         this.contactRepository = contactRepository;
     }
 
-    // @Override
-    // public void saveContact(Contact contact, User user) {
-    //     contact.setUser(user);
-    //     contactRepository.save(contact);
-    // }
     @Override
     public Contact saveContact(Contact contact) {
         return contactRepository.save(contact);
@@ -76,16 +69,16 @@ public class ContactServiceImpl implements ContactService {
         return contactRepository.findAll();
     }
 
-    @Override
-    public List<Contact> search(String name, String email, String phoneNumber) {
+    // @Override
+    // public List<Contact> search(String name, String email, String phoneNumber) {
 
-        List<Contact> contacts = new ArrayList<>();
-        return contacts.stream()
-                .filter(contact -> (name == null || contact.getName().contains(name))
-                && (email == null || contact.getEmail().contains(email))
-                && (phoneNumber == null || contact.getPhoneNumber().contains(phoneNumber)))
-                .collect(Collectors.toList());
-    }
+    //     List<Contact> contacts = new ArrayList<>();
+    //     return contacts.stream()
+    //             .filter(contact -> (name == null || contact.getName().contains(name))
+    //             && (email == null || contact.getEmail().contains(email))
+    //             && (phoneNumber == null || contact.getPhoneNumber().contains(phoneNumber)))
+    //             .collect(Collectors.toList());
+    // }
 
     @Override
     public Page<Contact> getAllContactsForUser(User user, int size, int page, String sortField, String sortDirection) {
@@ -99,7 +92,7 @@ public class ContactServiceImpl implements ContactService {
             throw new IllegalArgumentException("Page size must not be less than one");
         }
 
-        Sort sort = sortDirection.equals("desc")
+        var sort = sortDirection.equals("desc")
                 ? Sort.by(sortField).descending()
                 : Sort.by(sortField).ascending();
 
@@ -108,8 +101,38 @@ public class ContactServiceImpl implements ContactService {
         return contactRepository.findByUser(user, pageable);
     }
 
-    // @Override
-    // public Page<Contact> getAllContactsForUser(User user, int size, int page) {
-    //     throw new UnsupportedOperationException("Not supported yet.");
-    // }
+    @Override
+    public Page<Contact> searchByName(String nameKeyword, int size, int page, String sortBy, String order, User user) {
+
+        // Validate the page size
+        if (size < 1) {
+            throw new IllegalArgumentException("Page size must not be less than one");
+        }
+        
+        Sort sort = order.equals("desc")? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        var pageable = PageRequest.of(page, size, sort);
+        return contactRepository.findByUserAndNameContaining(user, nameKeyword, pageable);
+    }
+
+    @Override
+    public Page<Contact> searchByEmail(String emailKeyword, int size, int page, String sortBy, String order, User user) {
+
+        
+        Sort sort = order.equals("desc")? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        var pageable = PageRequest.of(page, size, sort);
+        return contactRepository.findByUserAndEmailContaining(user, emailKeyword, pageable);
+    }
+
+    @Override
+    public Page<Contact> searchByPhone(String phoneNumberKeyword, int size, int page, String sortBy, String order, User user) {
+
+        // Validate the page size
+        if (size < 1) {
+            throw new IllegalArgumentException("Page size must not be less than one");
+        }
+
+        Sort sort = order.equals("desc")? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        var pageable = PageRequest.of(page, size, sort);
+        return contactRepository.findByUserAndPhoneNumberContaining(user, phoneNumberKeyword, pageable);
+    }
 }
