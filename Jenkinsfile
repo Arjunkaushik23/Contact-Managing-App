@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'maven' // Use the name you have configured for Maven
-        jdk 'jdk-17' // Use the name you have configured for JDK
+        jdk 'jdk-22' // Use the name you have configured for JDK
     }
 
     stages {
