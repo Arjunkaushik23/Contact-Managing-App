@@ -6,6 +6,10 @@ pipeline {
         jdk 'jdk-22' // Use the name you have configured for JDK
     }
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Checkout') {
             steps {
